@@ -1,0 +1,7 @@
+{
+  "name": "yatm-mobile",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
