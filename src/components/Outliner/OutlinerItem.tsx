@@ -23,7 +23,7 @@ const OutlinerItem: React.FC<OutlinerItemProps> = ({ task, level, onToggleExpand
         style={{ '--padding-start': '0' }}
       >
         <div style={{ display: 'flex', alignItems: 'center', width: '100%', paddingLeft: paddingLeft }}>
-          {/* Indent / Expand Toggle */}
+          {/* インデント / 展開トグル */}
           <div
             className="expand-icon-container"
             onClick={(e) => {
@@ -38,7 +38,7 @@ const OutlinerItem: React.FC<OutlinerItemProps> = ({ task, level, onToggleExpand
             )}
           </div>
 
-          {/* Checkbox (Custom or Ionic) */}
+          {/* チェックボックス (カスタムまたはIonic) */}
           <IonCheckbox
             checked={task.isCompleted}
             onIonChange={() => onToggleComplete(task.id)}
@@ -47,12 +47,12 @@ const OutlinerItem: React.FC<OutlinerItemProps> = ({ task, level, onToggleExpand
             style={{ marginInlineEnd: '10px' }}
           />
 
-          {/* Task Title */}
+          {/* タスクタイトル */}
           <IonLabel className="ion-text-wrap">{task.title}</IonLabel>
         </div>
       </IonItem>
 
-      {/* Recursive Children */}
+      {/* 再帰的な子要素 */}
       {task.isExpanded && hasChildren && (
         <div className="children-container">
           {task.children.map(child => (

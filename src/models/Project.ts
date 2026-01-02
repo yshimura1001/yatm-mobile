@@ -1,6 +1,7 @@
 export interface Project {
   id: string;
   name: string;
-  color: string; // Hex code or ionic color name
+  color: string; // 16進数コードまたはIonicのカラー名
   taskCount?: number;
+  perspectiveId?: string;
 }

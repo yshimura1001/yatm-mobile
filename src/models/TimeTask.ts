@@ -7,4 +7,5 @@ export interface TimeTask {
   endTime?: Date;
   isCompleted: boolean;
   isRunning: boolean;
+  perspectiveId?: string;
 }

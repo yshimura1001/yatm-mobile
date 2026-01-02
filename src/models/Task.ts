@@ -5,7 +5,8 @@ export interface Task {
   children: Task[];
   isExpanded: boolean;
   note?: string;
-  // Future fields placeholders
+  perspectiveId?: string;
+  // 将来のフィールドのプレースホルダー
   // dueDate?: Date;
   // projectId?: string;
 }

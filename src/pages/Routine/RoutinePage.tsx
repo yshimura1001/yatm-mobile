@@ -1,31 +1,35 @@
-import React, { useState } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButtons, IonMenuButton, IonList, IonListHeader } from '@ionic/react';
-import { Routine } from '../../models/Routine';
+import React from 'react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButtons, IonMenuButton, IonList, IonFab, IonFabButton, IonIcon } from '@ionic/react';
+import { add } from 'ionicons/icons';
 import RoutineItem from '../../components/Routine/RoutineItem';
-
-const initialRoutines: Routine[] = [
-  { id: '1', title: '朝の運動', frequency: 'Daily', completedToday: false, streak: 5 },
-  { id: '2', title: '読書', frequency: 'Daily', completedToday: true, streak: 12 },
-  { id: '3', title: '週次レビュー', frequency: 'Weekly', completedToday: false, streak: 2 },
-  { id: '4', title: '瞑想', frequency: 'Daily', completedToday: false, streak: 0 },
-];
+import { useApp } from '../../context/AppContext';
 
 const RoutinePage: React.FC = () => {
-  const [routines, setRoutines] = useState<Routine[]>(initialRoutines);
+  const { routines, setRoutines, activePerspectiveId, perspectives } = useApp();
 
-  const handleToggle = (id: string) => {
+  const toggleComplete = (id: string) => {
     setRoutines(prev => prev.map(r => {
       if (r.id === id) {
         const newCompleted = !r.completedToday;
         return {
           ...r,
           completedToday: newCompleted,
-          streak: newCompleted ? r.streak + 1 : r.streak - 1
+          streak: newCompleted ? r.streak + 1 : Math.max(0, r.streak - 1),
+          lastCompleted: newCompleted ? new Date() : r.lastCompleted
         };
       }
       return r;
     }));
   };
+
+  const currentPerspectiveName = activePerspectiveId
+    ? perspectives.find(p => p.id === activePerspectiveId)?.name
+    : 'すべて';
+
+  // Filter routines based on active perspective
+  const filteredRoutines = activePerspectiveId
+    ? routines.filter(r => r.perspectiveId === activePerspectiveId)
+    : routines;
 
   return (
     <IonPage>
@@ -34,16 +38,24 @@ const RoutinePage: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>ルーチン</IonTitle>
+          <IonTitle>ルーチン ({currentPerspectiveName})</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
         <IonList>
-          <IonListHeader>今日</IonListHeader>
-          {routines.map(routine => (
-            <RoutineItem key={routine.id} routine={routine} onToggle={handleToggle} />
+          {filteredRoutines.map(routine => (
+            <RoutineItem
+              key={routine.id}
+              routine={routine}
+              onToggle={toggleComplete}
+            />
           ))}
         </IonList>
+        <IonFab vertical="bottom" horizontal="end" slot="fixed">
+          <IonFabButton>
+            <IonIcon icon={add} />
+          </IonFabButton>
+        </IonFab>
       </IonContent>
     </IonPage>
   );

@@ -11,7 +11,7 @@ import {
 } from '@ionic/react';
 
 import { useLocation } from 'react-router-dom';
-import { listOutline, listSharp, folderOutline, folderSharp, repeatOutline, repeatSharp, timeOutline, timeSharp } from 'ionicons/icons';
+import { listOutline, listSharp, folderOutline, folderSharp, repeatOutline, repeatSharp, timeOutline, timeSharp, layersOutline, layersSharp } from 'ionicons/icons';
 import './Menu.css';
 
 interface AppPage {
@@ -22,6 +22,12 @@ interface AppPage {
 }
 
 const appPages: AppPage[] = [
+  {
+    title: 'パースペクティブ',
+    url: '/perspective',
+    iosIcon: layersOutline,
+    mdIcon: layersSharp
+  },
   {
     title: 'プロジェクト',
     url: '/project',
@@ -56,7 +62,7 @@ const Menu: React.FC = () => {
       <IonContent>
         <IonList id="inbox-list">
           <IonListHeader>YATM</IonListHeader>
-          <IonNote>Yet Another Time Manager app.</IonNote>
+          <IonNote>Yet Another Time Management app.</IonNote>
           {appPages.map((appPage, index) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>

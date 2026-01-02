@@ -7,4 +7,5 @@ export interface Routine {
   completedToday: boolean;
   streak: number;
   lastCompleted?: Date;
+  perspectiveId?: string;
 }

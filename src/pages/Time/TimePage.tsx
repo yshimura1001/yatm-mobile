@@ -1,57 +1,65 @@
-import React, { useState, useEffect } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButtons, IonMenuButton, IonList, IonProgressBar, IonFooter, IonLabel } from '@ionic/react';
-import { TimeTask } from '../../models/TimeTask';
+import React, { useEffect } from 'react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButtons, IonMenuButton, IonList, IonProgressBar, IonFooter, IonLabel, IonFab, IonFabButton, IonIcon } from '@ionic/react';
+import { add } from 'ionicons/icons';
 import TimeTaskItem from '../../components/Time/TimeTaskItem';
-
-const initialTimeTasks: TimeTask[] = [
-  { id: '1', title: '朝のルーチン', estimatedMinutes: 30, actualMinutes: 0, isCompleted: false, isRunning: false },
-  { id: '2', title: 'メールチェック', estimatedMinutes: 15, actualMinutes: 0, isCompleted: false, isRunning: false },
-  { id: '3', title: '集中作業 1', estimatedMinutes: 90, actualMinutes: 0, isCompleted: false, isRunning: false },
-];
+import { useApp } from '../../context/AppContext';
 
 const TimePage: React.FC = () => {
-  const [tasks, setTasks] = useState<TimeTask[]>(initialTimeTasks);
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const { timeTasks, setTimeTasks, activePerspectiveId, perspectives } = useApp();
+  // currentTime is local UI state
+  const [currentTime, setCurrentTime] = React.useState(new Date());
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-      setTasks(prev => prev.map(task => {
-        if (task.isRunning) {
-          // In a real app, we would track start timestamp and diff, 
-          // but for simple mock UI we just increment generic counter or keep it static.
-          // Let's just update the view ref
-        }
-        return task;
-      }));
+      // In a real app, update running tasks' actual time here.
+      // For mock UI, we might just re-render or do nothing as visual update is minimal.
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
   const handleStart = (id: string) => {
-    setTasks(prev => prev.map(task =>
+    setTimeTasks(prev => prev.map(task =>
       task.id === id
         ? { ...task, isRunning: true, startTime: task.startTime || new Date() }
-        : { ...task, isRunning: false } // Stop others? TaskChute typically serial.
+        : { ...task, isRunning: false } // Serial execution: stop others
     ));
   };
 
   const handleStop = (id: string) => {
-    setTasks(prev => prev.map(task =>
+    setTimeTasks(prev => prev.map(task =>
       task.id === id ? { ...task, isRunning: false, endTime: new Date() } : task
     ));
   };
 
   const handleComplete = (id: string) => {
-    handleStop(id);
-    setTasks(prev => prev.map(task =>
-      task.id === id ? { ...task, isCompleted: !task.isCompleted, endTime: new Date() } : task
-    ));
+    // If running, stop it first (logic usually handled in UI, but good to be safe)
+    setTimeTasks(prev => prev.map(task => {
+      if (task.id === id) {
+        const isNowCompleted = !task.isCompleted;
+        return {
+          ...task,
+          isCompleted: isNowCompleted,
+          isRunning: false, // Force stop if completing
+          endTime: isNowCompleted ? new Date() : task.endTime
+        };
+      }
+      return task;
+    }));
   };
 
-  // Calculate total progress
-  const totalEst = tasks.reduce((acc, t) => acc + t.estimatedMinutes, 0);
-  const completedEst = tasks.filter(t => t.isCompleted).reduce((acc, t) => acc + t.estimatedMinutes, 0);
+  const currentPerspectiveName = activePerspectiveId
+    ? perspectives.find(p => p.id === activePerspectiveId)?.name
+    : 'すべて';
+
+  // Filter time tasks based on active perspective
+  const filteredTasks = activePerspectiveId
+    ? timeTasks.filter(t => t.perspectiveId === activePerspectiveId)
+    : timeTasks;
+
+  // Calculate progress based on FILTERED tasks
+  const totalEst = filteredTasks.reduce((acc, t) => acc + t.estimatedMinutes, 0);
+  const completedEst = filteredTasks.filter(t => t.isCompleted).reduce((acc, t) => acc + t.estimatedMinutes, 0);
   const progress = totalEst > 0 ? completedEst / totalEst : 0;
 
   return (
@@ -61,13 +69,13 @@ const TimePage: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>時間管理 ({currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})</IonTitle>
+          <IonTitle>時間 ({currentPerspectiveName})</IonTitle>
         </IonToolbar>
         <IonProgressBar value={progress} color="success"></IonProgressBar>
       </IonHeader>
       <IonContent fullscreen>
         <IonList>
-          {tasks.map(task => (
+          {filteredTasks.map(task => (
             <TimeTaskItem
               key={task.id}
               task={task}
@@ -77,6 +85,11 @@ const TimePage: React.FC = () => {
             />
           ))}
         </IonList>
+        <IonFab vertical="bottom" horizontal="end" slot="fixed">
+          <IonFabButton>
+            <IonIcon icon={add} />
+          </IonFabButton>
+        </IonFab>
       </IonContent>
       <IonFooter>
         <IonToolbar>

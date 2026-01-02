@@ -1,85 +1,50 @@
-import React, { useState } from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButtons, IonMenuButton, IonList } from '@ionic/react';
-import { Task } from '../../models/Task';
+import React from 'react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButtons, IonMenuButton, IonList, IonFab, IonFabButton, IonIcon } from '@ionic/react';
+import { add } from 'ionicons/icons';
 import OutlinerItem from '../../components/Outliner/OutlinerItem';
-
-const initialTasks: Task[] = [
-  {
-    id: '1',
-    title: 'プロジェクト アルファ',
-    isCompleted: false,
-    isExpanded: true,
-    children: [
-      {
-        id: '1-1',
-        title: 'リサーチ',
-        isCompleted: true,
-        isExpanded: false,
-        children: []
-      },
-      {
-        id: '1-2',
-        title: 'デザイン',
-        isCompleted: false,
-        isExpanded: true,
-        children: [
-          {
-            id: '1-2-1',
-            title: 'スケッチ',
-            isCompleted: false,
-            isExpanded: false,
-            children: []
-          },
-          {
-            id: '1-2-2',
-            title: 'プロトタイプ作成',
-            isCompleted: false,
-            isExpanded: false,
-            children: []
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: '2',
-    title: '個人の目標',
-    isCompleted: false,
-    isExpanded: false,
-    children: [
-      {
-        id: '2-1',
-        title: '運動',
-        isCompleted: false,
-        isExpanded: false,
-        children: []
-      }
-    ]
-  }
-];
+import { useApp } from '../../context/AppContext';
 
 const OutlinerPage: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const { tasks, setTasks, activePerspectiveId, perspectives } = useApp();
 
-  const toggleProperty = (taskList: Task[], id: string, prop: 'isExpanded' | 'isCompleted'): Task[] => {
-    return taskList.map(task => {
-      if (task.id === id) {
-        return { ...task, [prop]: !task[prop] };
-      }
-      if (task.children && task.children.length > 0) {
-        return { ...task, children: toggleProperty(task.children, id, prop) };
-      }
-      return task;
-    });
+  const toggleExpand = (id: string) => {
+    const toggleRecursive = (items: any[]): any[] => {
+      return items.map(item => {
+        if (item.id === id) {
+          return { ...item, isExpanded: !item.isExpanded };
+        }
+        if (item.children) {
+          return { ...item, children: toggleRecursive(item.children) };
+        }
+        return item;
+      });
+    };
+    setTasks(prev => toggleRecursive(prev));
   };
 
-  const handleToggleExpand = (id: string) => {
-    setTasks(prev => toggleProperty(prev, id, 'isExpanded'));
+  const toggleComplete = (id: string) => {
+    const toggleRecursive = (items: any[]): any[] => {
+      return items.map(item => {
+        if (item.id === id) {
+          return { ...item, isCompleted: !item.isCompleted };
+        }
+        if (item.children) {
+          return { ...item, children: toggleRecursive(item.children) };
+        }
+        return item;
+      });
+    };
+    setTasks(prev => toggleRecursive(prev));
   };
 
-  const handleToggleComplete = (id: string) => {
-    setTasks(prev => toggleProperty(prev, id, 'isCompleted'));
-  };
+  const currentPerspectiveName = activePerspectiveId
+    ? perspectives.find(p => p.id === activePerspectiveId)?.name
+    : 'すべて';
+
+  // Filter tasks based on active perspective
+  const filteredTasks = activePerspectiveId
+    ? tasks.filter(t => t.perspectiveId === activePerspectiveId)
+    : tasks;
 
   return (
     <IonPage>
@@ -88,21 +53,26 @@ const OutlinerPage: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>アウトライナー</IonTitle>
+          <IonTitle>アウトライナー ({currentPerspectiveName})</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
-        <IonList lines="none">
-          {tasks.map(task => (
+        <IonList>
+          {filteredTasks.map(task => (
             <OutlinerItem
               key={task.id}
               task={task}
+              onToggleExpand={toggleExpand}
+              onToggleComplete={toggleComplete}
               level={0}
-              onToggleExpand={handleToggleExpand}
-              onToggleComplete={handleToggleComplete}
             />
           ))}
         </IonList>
+        <IonFab vertical="bottom" horizontal="end" slot="fixed">
+          <IonFabButton>
+            <IonIcon icon={add} />
+          </IonFabButton>
+        </IonFab>
       </IonContent>
     </IonPage>
   );
