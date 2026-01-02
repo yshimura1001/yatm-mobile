@@ -1,0 +1,23 @@
+.outliner-item {
+  --min-height: 48px;
+  font-size: 16px;
+}
+
+.expand-icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  margin-right: 4px;
+}
+
+.spacer {
+  width: 24px;
+}
+
+.outliner-item.completed ion-label {
+  text-decoration: line-through;
+  color: var(--ion-color-medium);
+}
