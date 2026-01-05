@@ -7,7 +7,7 @@ import OutlinerPage from './pages/Outliner/OutlinerPage';
 import ProjectPage from './pages/Project/ProjectPage';
 import PerspectivePage from './pages/Perspective/PerspectivePage';
 
-import RoutinePage from './pages/Routine/RoutinePage';
+
 import TimePage from './pages/Time/TimePage';
 
 /* Ionicコンポーネントが正しく動作するために必要なコアCSS */
@@ -62,9 +62,7 @@ const App: React.FC = () => {
               <Route path="/perspective" exact={true}>
                 <PerspectivePage />
               </Route>
-              <Route path="/routine" exact={true}>
-                <RoutinePage />
-              </Route>
+
               <Route path="/time" exact={true}>
                 <TimePage />
               </Route>

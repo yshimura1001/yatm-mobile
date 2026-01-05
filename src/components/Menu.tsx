@@ -40,12 +40,7 @@ const appPages: AppPage[] = [
     iosIcon: listOutline,
     mdIcon: listSharp
   },
-  {
-    title: 'ルーチン',
-    url: '/routine',
-    iosIcon: repeatOutline,
-    mdIcon: repeatSharp
-  },
+
   {
     title: '時間',
     url: '/time',
